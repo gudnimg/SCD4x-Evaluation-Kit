@@ -76,5 +76,16 @@ def read_measurement(i2c: SoftI2C) -> None:
     print("# READ_MEASUREMENT")
     i2c.readfrom_mem_into(0x62, READ_MEASUREMENT, buf, addrsize=16)
 
+    #TODO: check CRC byte buf[2]
     CO2_ppm = buf[0] << 8 | buf[1]
-    print("CO2 (ppm): %s" % CO2_ppm)
+    print("CO2: %sppm" % CO2_ppm)
+
+    #TODO: check CRC byte buf[5]
+    temperature = buf[3] << 8 | buf[4]
+    temperature = -45 + (175 * temperature) / (2**16 - 1)
+    print("Temperature: %.2f°C" % temperature)
+
+    #TODO: check CRC byte buf[8]
+    relative_humidity = buf[6] << 8 | buf[7]
+    relative_humidity = (100 * relative_humidity) / (2**16 - 1)
+    print("Humidity: %.2f%%" % relative_humidity)
