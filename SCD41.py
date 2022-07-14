@@ -36,6 +36,23 @@ POWER_DOWN = 0x36E0
 WAKE_UP = 0x36F6
 
 
+def start_periodic_measurement(i2c: SoftI2C) -> None:
+    """
+    Start periodic measurement, signal update interval is 5 seconds.
+    """
+    i2c.writeto_mem(0x62, START_PERIODIC_MEASUREMENT, b"", addrsize=16)
+
+
+def stop_periodic_measurement(i2c: SoftI2C) -> None:
+    """
+    Stop periodic measurement to change the sensor configuration or to save power.
+    Note that the sensor will only respond to other commands after waiting 500 ms
+    after issuing the stop_periodic_measurement command.
+    """
+    i2c.writeto_mem(0x62, STOP_PERIODIC_MEASUREMENT, b"", addrsize=16)
+    time.sleep(0.5)  # Sensor becomes responsive after 500ms
+
+
 def is_data_ready(i2c: SoftI2C) -> bool:
     buf: bytearray = bytearray(3)
     i2c.readfrom_mem_into(0x62, GET_DATA_READY_STATUS, buf, addrsize=16)
@@ -47,17 +64,15 @@ def read_measurement(i2c: SoftI2C) -> None:
     buf: bytearray = bytearray(9)
 
     print("# STOP_PERIODIC_MEASUREMENT")
-    i2c.writeto_mem(0x62, STOP_PERIODIC_MEASUREMENT, b"", addrsize=16)
-    time.sleep(1)  # Sensor becomes responsive after 500ms
-    print("# START_PERIODIC_MEASUREMENT")
-    i2c.writeto_mem(0x62, START_PERIODIC_MEASUREMENT, b"", addrsize=16)
+    stop_periodic_measurement(i2c)
 
-    # Wait for measurement to be ready
+    print("# START_PERIODIC_MEASUREMENT")
+    start_periodic_measurement(i2c)
+
     print("# GET_DATA_READY_STATUS")
     while is_data_ready(i2c) == False:
         continue
 
-    # Read the measurement
     print("# READ_MEASUREMENT")
     i2c.readfrom_mem_into(0x62, READ_MEASUREMENT, buf, addrsize=16)
 
