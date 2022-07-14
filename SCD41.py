@@ -36,6 +36,22 @@ POWER_DOWN = 0x36E0
 WAKE_UP = 0x36F6
 
 
+def crc8(data: bytearray) -> int:
+    """
+    CRC-8 algorithm
+    """
+    crc = 0xFF
+    for byte in data:
+        crc ^= byte
+        for bit in range(8):
+            if crc & 0x80:
+                crc = (crc << 1) ^ 0x31
+            else:
+                crc = crc << 1
+        crc &= 0xFF
+    return crc
+
+
 def start_periodic_measurement(i2c: SoftI2C) -> None:
     """
     Start periodic measurement, signal update interval is 5 seconds.
@@ -59,33 +75,47 @@ def is_data_ready(i2c: SoftI2C) -> bool:
     return ((buf[0] & 0x7) << 8) | buf[1] != 0
 
 
+# TODO
+# def set_temperature_offset(i2c: SoftI2C) -> None:
+# def get_temperature_offset(i2c: SoftI2C) -> None:
+# def set_sensor_altitude(i2c: SoftI2C) -> None:
+# def get_sensor_altitude(i2c: SoftI2C) -> None:
+# def set_ambient_pressure(i2c: SoftI2C, pressure_pa : int) -> None:
+
+
 def read_measurement(i2c: SoftI2C) -> None:
 
     buf: bytearray = bytearray(9)
 
-    print("# STOP_PERIODIC_MEASUREMENT")
-    stop_periodic_measurement(i2c)
-
-    print("# START_PERIODIC_MEASUREMENT")
     start_periodic_measurement(i2c)
 
-    print("# GET_DATA_READY_STATUS")
     while is_data_ready(i2c) == False:
         continue
 
-    print("# READ_MEASUREMENT")
     i2c.readfrom_mem_into(0x62, READ_MEASUREMENT, buf, addrsize=16)
 
-    #TODO: check CRC byte buf[2]
     CO2_ppm = buf[0] << 8 | buf[1]
+    if crc8(buf[0:2]) != buf[2]:
+        print(
+            "Received CRC %s did not match calculated CRC %s"
+            % (hex(buf[2]), hex(crc8(buf[0:2])))
+        )
     print("CO2: %sppm" % CO2_ppm)
 
-    #TODO: check CRC byte buf[5]
     temperature = buf[3] << 8 | buf[4]
     temperature = -45 + (175 * temperature) / (2**16 - 1)
+    if crc8(buf[3:5]) != buf[5]:
+        print(
+            "Received CRC %s did not match calculated CRC %s"
+            % (hex(buf[5]), hex(crc8(buf[3:5])))
+        )
     print("Temperature: %.2f°C" % temperature)
 
-    #TODO: check CRC byte buf[8]
     relative_humidity = buf[6] << 8 | buf[7]
     relative_humidity = (100 * relative_humidity) / (2**16 - 1)
+    if crc8(buf[6:8]) != buf[8]:
+        print(
+            "Received CRC %s did not match calculated CRC %s"
+            % (hex(buf[8]), hex(crc8(buf[6:8])))
+        )
     print("Humidity: %.2f%%" % relative_humidity)
