@@ -173,7 +173,7 @@ def set_ambient_pressure(i2c: SoftI2C, pressure: int) -> None:
         return
 
     buf: bytearray = bytearray(3)
-    pressure = int(pressure / 100) # Signal conversion
+    pressure = int(pressure / 100)  # Signal conversion
     pressure_bytes = pressure.to_bytes(2, "big")
     buf[0] = pressure_bytes[0]  # MSB
     buf[1] = pressure_bytes[1]  # LSB
@@ -182,6 +182,7 @@ def set_ambient_pressure(i2c: SoftI2C, pressure: int) -> None:
 
     # Store pressure in EEPROM
     persist_settings(i2c)
+
 
 # TODO
 # def perform_forced_recalibration(i2c: SoftI2C) -> None:
@@ -195,6 +196,7 @@ def set_ambient_pressure(i2c: SoftI2C, pressure: int) -> None:
 # TODO
 # def start_low_power_periodic_measurement(i2c: SoftI2C) -> None:
 
+
 def is_data_ready(i2c: SoftI2C) -> bool:
     buf: bytearray = bytearray(3)
     i2c.readfrom_mem_into(0x62, GET_DATA_READY_STATUS, buf, addrsize=16)
@@ -204,8 +206,31 @@ def is_data_ready(i2c: SoftI2C) -> bool:
 def persist_settings(i2c: SoftI2C) -> None:
     i2c.writeto_mem(0x62, PERSIST_SETTINGS, b"", addrsize=16)
 
+
 # TODO
-# def get_serial_number(i2c: SoftI2C) -> None:
+def get_serial_number(i2c: SoftI2C) -> int:
+    """
+    Reading out the serial number can be used to identify the chip and to
+    verify the presence of the sensor.
+    """
+
+    buf: bytearray = bytearray(9)
+    i2c.readfrom_mem_into(0x62, GET_SERIAL_NUMBER, buf, addrsize=16)
+
+    if (
+        crc8(buf[0:2]) != buf[2]
+        and crc8(buf[3:5]) != buf[5]
+        and crc8(buf[6:8]) != buf[8]
+    ):
+        print(
+            "Received CRC %s did not match calculated CRC %s"
+            % (hex(buf[8]), hex(crc8(buf[6:8])))
+        )
+
+    return (
+        buf[0] << 40 | buf[1] << 32 | buf[3] << 24 | buf[4] << 16 | buf[6] << 8 | buf[7]
+    )
+
 
 # TODO
 # def perform_self_test(i2c: SoftI2C) -> None:
