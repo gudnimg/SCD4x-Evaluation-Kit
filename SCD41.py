@@ -207,7 +207,6 @@ def persist_settings(i2c: SoftI2C) -> None:
     i2c.writeto_mem(0x62, PERSIST_SETTINGS, b"", addrsize=16)
 
 
-# TODO
 def get_serial_number(i2c: SoftI2C) -> int:
     """
     Reading out the serial number can be used to identify the chip and to
