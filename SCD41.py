@@ -113,12 +113,6 @@ def stop_periodic_measurement(i2c: SoftI2C) -> None:
     time.sleep(0.5)  # Sensor becomes responsive after 500ms
 
 
-def is_data_ready(i2c: SoftI2C) -> bool:
-    buf: bytearray = bytearray(3)
-    i2c.readfrom_mem_into(0x62, GET_DATA_READY_STATUS, buf, addrsize=16)
-    return ((buf[0] & 0x7) << 8) | buf[1] != 0
-
-
 # TODO
 # def set_temperature_offset(i2c: SoftI2C) -> None:
 
@@ -189,6 +183,47 @@ def set_ambient_pressure(i2c: SoftI2C, pressure: int) -> None:
     # Store pressure in EEPROM
     persist_settings(i2c)
 
+# TODO
+# def perform_forced_recalibration(i2c: SoftI2C) -> None:
+
+# TODO
+# def set_automatic_self_calibration_enabled(i2c: SoftI2C) -> None:
+
+# TODO
+# def get_automatic_self_calibration_enabled(i2c: SoftI2C) -> None:
+
+# TODO
+# def start_low_power_periodic_measurement(i2c: SoftI2C) -> None:
+
+def is_data_ready(i2c: SoftI2C) -> bool:
+    buf: bytearray = bytearray(3)
+    i2c.readfrom_mem_into(0x62, GET_DATA_READY_STATUS, buf, addrsize=16)
+    return ((buf[0] & 0x7) << 8) | buf[1] != 0
+
 
 def persist_settings(i2c: SoftI2C) -> None:
     i2c.writeto_mem(0x62, PERSIST_SETTINGS, b"", addrsize=16)
+
+# TODO
+# def get_serial_number(i2c: SoftI2C) -> None:
+
+# TODO
+# def perform_self_test(i2c: SoftI2C) -> None:
+
+# TODO
+# def perform_factory_reset(i2c: SoftI2C) -> None:
+
+# TODO
+# def reinit(i2c: SoftI2C) -> None:
+
+# TODO
+# def measure_single_shot(i2c: SoftI2C) -> None:
+
+# TODO
+# def measure_single_shot_rht_only(i2c: SoftI2C) -> None:
+
+# TODO
+# def power_down(i2c: SoftI2C) -> None:
+
+# TODO
+# def wake_up(i2c: SoftI2C) -> None:
