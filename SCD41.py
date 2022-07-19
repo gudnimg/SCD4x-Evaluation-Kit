@@ -196,8 +196,13 @@ def set_ambient_pressure(i2c: SoftI2C, pressure: int) -> None:
 # TODO
 # def get_automatic_self_calibration_enabled(i2c: SoftI2C) -> None:
 
-# TODO
-# def start_low_power_periodic_measurement(i2c: SoftI2C) -> None:
+
+def start_low_power_periodic_measurement(i2c: SoftI2C) -> None:
+    """
+    start low power periodic measurement,
+    signal update interval is approximately 30 seconds
+    """
+    i2c.writeto_mem(0x62, START_LOW_POWER_PERIODIC_MEASUREMENT, b"", addrsize=16)
 
 
 def is_data_ready(i2c: SoftI2C) -> bool:
