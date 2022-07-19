@@ -19,5 +19,7 @@ print("Serial number: %s" % SCD41.get_serial_number(i2c))
 print("Setting Altitude to 41m")
 SCD41.set_sensor_altitude(i2c, 41)
 
+SCD41.perform_self_test(i2c)
+
 while True:
     SCD41.read_measurement(i2c)

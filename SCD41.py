@@ -1,6 +1,9 @@
 import time
 from machine import SoftI2C
 
+I2C_READ_BIT = 1
+I2C_WRITE_BIT = 0
+
 # I2C commands - Basic commands
 START_PERIODIC_MEASUREMENT = 0x21B1
 READ_MEASUREMENT = 0xEC05
@@ -206,6 +209,9 @@ def is_data_ready(i2c: SoftI2C) -> bool:
 def persist_settings(i2c: SoftI2C) -> None:
     i2c.writeto_mem(0x62, PERSIST_SETTINGS, b"", addrsize=16)
 
+    # Command execution time is 800ms
+    time.sleep(0.8)
+
 
 def get_serial_number(i2c: SoftI2C) -> int:
     """
@@ -231,8 +237,45 @@ def get_serial_number(i2c: SoftI2C) -> int:
     )
 
 
-# TODO
-# def perform_self_test(i2c: SoftI2C) -> None:
+def perform_self_test(i2c: SoftI2C) -> bool:
+    """
+    The perform_self_test feature can be used as an
+    end-of-line test to check sensor functionality
+    and the customer power supply to the sensor.
+    """
+    i2c.start()
+    buf: bytearray = bytearray(3)
+    buf[0] = (0x62 << 1) | I2C_WRITE_BIT
+    buf[1] = (PERFORM_SELF_TEST & 0xFF00) >> 8
+    buf[2] = PERFORM_SELF_TEST & 0xFF
+    i2c.write(buf)
+
+    # Wait for at least 10000ms while
+    # command is executing
+    time.sleep(10)
+
+    # Change to read mode and read result
+    i2c.start()
+    buf2: bytearray = bytearray(1)
+    buf2[0] = (0x62 << 1) | I2C_READ_BIT
+    i2c.write(buf2)
+
+    i2c.readinto(buf, True)
+    i2c.stop()
+
+    if crc8(buf[0:2]) != buf[2]:
+        print(
+            "Received CRC %s did not match calculated CRC %s"
+            % (hex(buf[2]), hex(crc8(buf[0:2])))
+        )
+
+    if buf[0] << 8 | buf[1] == 0x0000:
+        print("Self-test OK")
+        return True
+    else:
+        print("Self-test FAIL")
+        return False
+
 
 # TODO
 # def perform_factory_reset(i2c: SoftI2C) -> None:
