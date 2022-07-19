@@ -190,11 +190,43 @@ def set_ambient_pressure(i2c: SoftI2C, pressure: int) -> None:
 # TODO
 # def perform_forced_recalibration(i2c: SoftI2C) -> None:
 
-# TODO
-# def set_automatic_self_calibration_enabled(i2c: SoftI2C) -> None:
 
-# TODO
-# def get_automatic_self_calibration_enabled(i2c: SoftI2C) -> None:
+def set_automatic_self_calibration_enabled(i2c: SoftI2C, asc: bool) -> None:
+    """
+    Set the current state (enabled / disabled) of the automatic self-calibration.
+    By default, ASC is enabled. To save the setting to the EEPROM, the
+    persist_setting (see chapter 3.9.1) command must be issued.
+    """
+    if isIdle == False:
+        print("# Error: Sensor is not IDLE")
+        return
+
+    buf: bytearray = bytearray(3)
+    buf[0] = 0x00  # MSB
+    buf[1] = int(asc)  # LSB
+    buf[2] = crc8(buf[0:2])  # CRC
+    i2c.writeto_mem(0x62, SET_AUTOMATIC_SELF_CALIBRATION_ENABLED, buf, addrsize=16)
+
+    # Store altitude in EEPROM
+    persist_settings(i2c)
+
+
+def get_automatic_self_calibration_enabled(i2c: SoftI2C) -> bool:
+    """
+    Return True if ASC is enabled, else False
+    """
+    buf: bytearray = bytearray(3)
+    i2c.readfrom_mem_into(
+        0x62, GET_AUTOMATIC_SELF_CALIBRATION_ENABLED, buf, addrsize=16
+    )
+
+    if crc8(buf[0:2]) != buf[2]:
+        print(
+            "Received CRC %s did not match calculated CRC %s"
+            % (hex(buf[2]), hex(crc8(buf[0:2])))
+        )
+
+    return (buf[0] << 8) | buf[1] != 0
 
 
 def start_low_power_periodic_measurement(i2c: SoftI2C) -> None:
