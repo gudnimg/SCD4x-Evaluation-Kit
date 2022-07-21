@@ -326,8 +326,24 @@ def perform_self_test(i2c: SoftI2C) -> bool:
 # TODO
 # def measure_single_shot_rht_only(i2c: SoftI2C) -> None:
 
-# TODO
-# def power_down(i2c: SoftI2C) -> None:
 
-# TODO
-# def wake_up(i2c: SoftI2C) -> None:
+def power_down(i2c: SoftI2C) -> None:
+    """
+    Put the sensor from idle to sleep to reduce current consumption.
+    Can be used to power down when operating the sensor
+    in power-cycled single shot mode.
+    """
+    i2c.writeto_mem(0x62, POWER_DOWN, b"", addrsize=16)
+
+
+def wake_up(i2c: SoftI2C) -> None:
+    """
+    Wake up the sensor from sleep mode into idle mode.
+    Note that the SCD4x does not acknowledge the wake_up
+    command. To verify that the sensor is in the idle state
+    after issuing the wake_up command, the serial number can be read out
+    (chapter 3.9.2). Note that the first reading obtained using
+    measure_single_shot (chapter 3.10.1) after waking up the sensor
+    should be discarded.
+    """
+    i2c.writeto_mem(0x62, WAKE_UP, b"", addrsize=16)
