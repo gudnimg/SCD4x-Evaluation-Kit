@@ -316,17 +316,40 @@ def perform_self_test(i2c: SoftI2C) -> bool:
         return False
 
 
-# TODO
-# def perform_factory_reset(i2c: SoftI2C) -> None:
+def perform_factory_reset(i2c: SoftI2C) -> None:
+    """
+    The perform_factory_reset command resets all configuration settings stored
+    in the EEPROM and erases the FRC and ASC algorithm history.
+    """
+    i2c.writeto_mem(0x62, PERFORM_FACTORY_RESET, b"", addrsize=16)
 
-# TODO
-# def reinit(i2c: SoftI2C) -> None:
 
-# TODO
-# def measure_single_shot(i2c: SoftI2C) -> None:
+def reinit(i2c: SoftI2C) -> None:
+    """
+    The reinit command reinitializes the sensor by reloading user settings
+    from EEPROM. Before sending the reinit command, the stop measurement
+    command must be issued. If the reinit command does not trigger the
+    desired re-initialization, a power-cycle should be applied to the SCD4x.
+    """
+    i2c.writeto_mem(0x62, PERFORM_REINIT, b"", addrsize=16)
 
-# TODO
-# def measure_single_shot_rht_only(i2c: SoftI2C) -> None:
+
+def measure_single_shot(i2c: SoftI2C) -> None:
+    """
+    On-demand measurement of CO2 concentration, relative humidity and
+    temperature. The sensor output is read using the read_measurement
+    command (chapter 3.5.2).
+    """
+    i2c.writeto_mem(0x62, MEASURE_SINGLE_SHOT, b"", addrsize=16)
+
+
+def measure_single_shot_rht_only(i2c: SoftI2C) -> None:
+    """
+    On-demand measurement of relative humidity and temperature only.
+    The sensor output is read using the read_measurement command
+    (chapter 3.5.2). CO2 output is returned as 0 ppm.
+    """
+    i2c.writeto_mem(0x62, MEASURE_SINGLE_SHOT_RHT_ONLY, b"", addrsize=16)
 
 
 def power_down(i2c: SoftI2C) -> None:
