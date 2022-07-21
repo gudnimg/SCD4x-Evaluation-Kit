@@ -166,10 +166,12 @@ def get_sensor_altitude(i2c: SoftI2C) -> None:
 
 def set_ambient_pressure(i2c: SoftI2C, pressure: int) -> None:
     """
-    The set_ambient_pressure command can be sent during periodic measurements to enable continuous pressure
-    compensation. Note that setting an ambient pressure using set_ambient_pressure overrides any pressure compensation based
-    on a previously set sensor altitude. Use of this command is highly recommended for applications experiencing significant ambient
-    pressure changes to ensure sensor accuracy
+    The set_ambient_pressure command can be sent during periodic measurements
+    to enable continuous pressure compensation. Note that setting an ambient
+    pressure using set_ambient_pressure overrides any pressure compensation
+    based on a previously set sensor altitude. Use of this command is highly
+    recommended for applications experiencing significant ambient pressure
+    changes to ensure sensor accuracy
     """
     if isIdle is False:
         print("# Error: Sensor is not IDLE")
