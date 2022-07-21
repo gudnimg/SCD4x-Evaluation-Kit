@@ -72,7 +72,7 @@ def read_measurement(i2c: SoftI2C) -> None:
 
     start_periodic_measurement(i2c)
 
-    while is_data_ready(i2c) == False:
+    while is_data_ready(i2c) is False:
         continue
 
     i2c.readfrom_mem_into(0x62, READ_MEASUREMENT, buf, addrsize=16)
@@ -128,7 +128,7 @@ def set_sensor_altitude(i2c: SoftI2C, altitude: int) -> None:
     Get the set sensor altitude. The altitude represenets meters above sea level.
     NOTE: Sensor must be in IDLE mode
     """
-    if isIdle == False:
+    if isIdle is False:
         print("# Error: Sensor is not IDLE")
         return
 
@@ -148,7 +148,7 @@ def get_sensor_altitude(i2c: SoftI2C) -> None:
     Get the set sensor altitude. The altitude represenets meters above sea level.
     NOTE: Sensor must be in IDLE mode
     """
-    if isIdle == False:
+    if isIdle is False:
         print("# Error: Sensor is not IDLE")
         return
 
@@ -171,7 +171,7 @@ def set_ambient_pressure(i2c: SoftI2C, pressure: int) -> None:
     on a previously set sensor altitude. Use of this command is highly recommended for applications experiencing significant ambient
     pressure changes to ensure sensor accuracy
     """
-    if isIdle == False:
+    if isIdle is False:
         print("# Error: Sensor is not IDLE")
         return
 
@@ -197,7 +197,7 @@ def set_automatic_self_calibration_enabled(i2c: SoftI2C, asc: bool) -> None:
     By default, ASC is enabled. To save the setting to the EEPROM, the
     persist_setting (see chapter 3.9.1) command must be issued.
     """
-    if isIdle == False:
+    if isIdle is False:
         print("# Error: Sensor is not IDLE")
         return
 
