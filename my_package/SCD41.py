@@ -1,5 +1,6 @@
 import time
 from machine import SoftI2C
+from utilities import crc8
 
 I2C_READ_BIT = 1
 I2C_WRITE_BIT = 0
@@ -39,23 +40,6 @@ POWER_DOWN = 0x36E0
 WAKE_UP = 0x36F6
 
 isIdle: bool = True
-
-
-def crc8(data: bytearray) -> int:
-    """
-    CRC-8 algorithm
-    """
-    crc = 0xFF
-    for byte in data:
-        crc ^= byte
-        for bit in range(8):
-            if crc & 0x80:
-                crc = (crc << 1) ^ 0x31
-            else:
-                crc = crc << 1
-        crc &= 0xFF
-    return crc
-
 
 def start_periodic_measurement(i2c: SoftI2C) -> None:
     """

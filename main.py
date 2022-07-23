@@ -1,5 +1,5 @@
 from machine import SoftI2C
-import SCD41
+import my_package.SCD41 as SCD41
 
 # create software I2C object
 i2c: SoftI2C = SoftI2C(scl="X9", sda="X10", freq=400000)
